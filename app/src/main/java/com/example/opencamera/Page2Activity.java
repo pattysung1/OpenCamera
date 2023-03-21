@@ -5,6 +5,7 @@ import androidx.core.content.FileProvider;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,10 +30,11 @@ public class Page2Activity extends AppCompatActivity
     TextView m_galleryButton;
     TextView m_title;
     Button m_uploadButton;
+    private File m_photoFile; //用於存儲拍攝的圖像檔案
+    private String m_currentPhotoPath; //指定文件路徑
 
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
-
     private static final int PERMISSIONS_REQUEST_CAMERA = 100; //請求權限
 
     private ImageView m_ImageView;
@@ -114,10 +116,8 @@ public class Page2Activity extends AppCompatActivity
 
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                Bundle extras = data.getExtras();
-                //將拍攝的照片轉成Bitmap，透過"data"獲得
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                //imageView顯示結果
+                //使用之前儲存的文件來顯示圖片
+                Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
                 m_ImageView.setImageBitmap(imageBitmap);
                 saveImage(imageBitmap);
             } else if (requestCode == REQUEST_IMAGE_PICK) {
@@ -129,23 +129,24 @@ public class Page2Activity extends AppCompatActivity
         }
     }
 
+    //創建一個用於儲存照片的文件(可指定文件的名稱和路徑)
     private File createImageFile() throws IOException {
-        // Create an image file name
+        // 用時間戳命名文件，避免重複
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
 
-        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
-        File imageFile = File.createTempFile(
+        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES); //獲取用於儲存拍攝照片的目錄
+        File imageFile = File.createTempFile( //創建臨時文件
                 imageFileName,   /* prefix */
                 ".jpg",          /* suffix */
                 storageDir       /* directory */
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        String currentPhotoPath = imageFile.getAbsolutePath();
+        // 保存文件路徑，稍後用於顯示圖片
+        m_currentPhotoPath = imageFile.getAbsolutePath();
         return imageFile;
     }
-
+    //將拍攝的照片（即Bitmap對象）保存到createImageFile創建的文件中
     private void saveImage( Bitmap bitmap )
     {
         // Create an image file name

@@ -16,7 +16,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="想上傳的照片"
-            android:textSize="25sp"
+            android:textSize="30sp"
             android:layout_weight="1"
             android:layout_marginTop="20dp"
             android:gravity="center"
@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="上傳檔案"
-            android:textSize="20sp"
+            android:textSize="25sp"
             android:layout_gravity="center">
 
         </Button>
