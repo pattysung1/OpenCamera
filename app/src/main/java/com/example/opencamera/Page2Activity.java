@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,10 +22,14 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Page2 extends AppCompatActivity
+public class Page2Activity extends AppCompatActivity
 {
+    String TAG = "Patty:P2";
     TextView m_cameraButton;
     TextView m_galleryButton;
+    TextView m_title;
+    Button m_uploadButton;
+
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
 
@@ -35,42 +40,56 @@ public class Page2 extends AppCompatActivity
     @Override
     protected void onCreate( Bundle savedInstanceState )
     {
-        m_cameraButton = findViewById(R.id.cameraButton);
-        m_galleryButton = findViewById(R.id.galleryButton);
+        super.onCreate( savedInstanceState );
+        setContentView( R.layout.activity_page2 );
+
+        Log.d(TAG , "onCreate: " );
+
+        m_cameraButton = findViewById( R.id.cameraButton );
+
+        m_galleryButton = findViewById( R.id.galleryButton );
         m_ImageView = findViewById( R.id.imageView );
+        m_title = findViewById( R.id.title );
+        m_uploadButton = findViewById( R.id.uploadButton );
+
+
 
         //按下cameraButton
         m_cameraButton.setOnClickListener( new View.OnClickListener()
         {
             @Override
-            public void onClick( View v )
+            public void onClick( View view )
             {
-                Intent takePictureIntent = new Intent( MediaStore.ACTION_IMAGE_CAPTURE);
-                // Ensure that there's a camera activity to handle the intent
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    // Create the File where the photo should go
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    } catch ( IOException ex) {
-                        // Error occurred while creating the File
+                // Create a new empty file to save the image
+                File photoFile = null;
+                try
+                {
+                    photoFile = createImageFile();
+                }
+                catch ( IOException ex )
+                {
+                    // Error occurred while creating the File
+                    ex.printStackTrace();
+                }
 
-                    }
-                    // Continue only if the File was successfully created
-                    if (photoFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(Page2.this,
-                                "com.example.myapp.fileprovider",
-                                photoFile);
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                // Continue only if the File was successfully created
+                if ( photoFile != null )
+                {
+                    // Create the Intent to capture a photo
+                    Intent takePictureIntent = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
+
+                    // Specify the file URI as the output for the photo
+                    Uri photoURI = FileProvider.getUriForFile( Page2Activity.this,
+                            "com.example.myapp.fileprovider",
+                            photoFile );
+                    takePictureIntent.putExtra( MediaStore.EXTRA_OUTPUT, photoURI );
+
+                    // Launch the camera app
+                    if ( takePictureIntent.resolveActivity( getPackageManager() ) != null )
+                    {
+                        startActivityForResult( takePictureIntent, REQUEST_IMAGE_CAPTURE );
                     }
                 }
-//                //開啟相機
-//                Intent takePictureIntent = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
-//                if ( takePictureIntent.resolveActivity( getPackageManager() ) != null )
-//                {
-//                    startActivityForResult( takePictureIntent, REQUEST_IMAGE_CAPTURE );
-//                }
             }
         } );
         //按下galleryButton
@@ -79,9 +98,10 @@ public class Page2 extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-                Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                if (pickPhotoIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_PICK);
+                Intent pickPhotoIntent = new Intent( Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI );
+                if ( pickPhotoIntent.resolveActivity( getPackageManager() ) != null )
+                {
+                    startActivityForResult( pickPhotoIntent, REQUEST_IMAGE_PICK );
                 }
             }
         } );
