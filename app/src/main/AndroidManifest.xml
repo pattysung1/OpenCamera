@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<!--    相機權限-->
+<!--    <uses-permission android:name="android.permission.CAMERA" />-->
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
+<!--    寫入外部存儲權限（用於保存圖像到本地存儲）-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+<!--    讀取外部存儲權限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.OpenCamera"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="31">
+        <activity
+            android:name=".Page2"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.myapp.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"></meta-data>
+<!--     您的 FileProvider 的身份識別符將變為 com.example.myapp.fileprovider，這個身份識別符與其他應用程序的 FileProvider 不同。
+同時，您也需要修改代碼中 FileProvider 的引用。例如，如果您之前使用的是 com.example.android.fileprovider，現在您需要修改成 com.example.myapp.fileprovider。
+這樣，您的應用程序就不會與其他應用程序的 FileProvider 產生衝突了       -->
+        </provider>
+
+    </application>
+
+</manifest>
