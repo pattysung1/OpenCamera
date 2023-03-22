@@ -2,10 +2,13 @@ package com.example.opencamera;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import application.SettingPreference;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.CameraProfile;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,34 +65,23 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-                // Create a new empty file to save the image
-                File photoFile = null;
-                try
-                {
-                    photoFile = createImageFile();
-                }
-                catch ( IOException ex )
-                {
-                    // Error occurred while creating the File
-                    ex.printStackTrace();
-                }
-
-                // Continue only if the File was successfully created
-                if ( photoFile != null )
-                {
-                    // Create the Intent to capture a photo
-                    Intent takePictureIntent = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
-
-                    // Specify the file URI as the output for the photo
-                    Uri photoURI = FileProvider.getUriForFile( Page2Activity.this,
-                            "com.example.myapp.fileprovider",
-                            photoFile );
-                    takePictureIntent.putExtra( MediaStore.EXTRA_OUTPUT, photoURI );
-
-                    // Launch the camera app
-                    if ( takePictureIntent.resolveActivity( getPackageManager() ) != null )
-                    {
-                        startActivityForResult( takePictureIntent, REQUEST_IMAGE_CAPTURE );
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Check if there is a camera app installed on the device
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    // Create a new empty file to save the image
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    if (photoFile != null) {
+                        // Get the URI of the file using a FileProvider
+                        Uri photoURI = FileProvider.getUriForFile(Page2Activity.this, "com.example.myapp.fileprovider", photoFile);
+                        // Set the file URI as the output for the photo
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        // Launch the camera app
+                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                     }
                 }
             }
@@ -107,7 +99,21 @@ public class Page2Activity extends AppCompatActivity
                 }
             }
         } );
+        //上傳檔案
+        m_uploadButton.setOnClickListener( new View.OnClickListener()
+        {
+            @Override
+            public void onClick( View view )
+            {
+                // 將圖片路徑保存到SharedPreferences
+                if ( m_currentPhotoPath != null )
+                {
 
+                    SettingPreference.getInstance().setSample( m_currentPhotoPath );
+                    Log.d( "Patty:Page2", "createImageFile: " +m_currentPhotoPath );
+                }
+            }
+        } );
     }
 
     @Override
@@ -123,8 +129,14 @@ public class Page2Activity extends AppCompatActivity
             } else if (requestCode == REQUEST_IMAGE_PICK) {
                 //將選擇的照片轉成Bitmap
                 Uri imageUri = data.getData();
-                //imageView顯示結果
-                m_ImageView.setImageURI(imageUri);
+                try {
+                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                    //imageView顯示結果
+                    m_ImageView.setImageBitmap(imageBitmap);
+                    saveImage(imageBitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -134,38 +146,70 @@ public class Page2Activity extends AppCompatActivity
         // 用時間戳命名文件，避免重複
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-
-        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES); //獲取用於儲存拍攝照片的目錄
+        //獲取用於儲存拍攝照片的目錄
+        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES );
         File imageFile = File.createTempFile( //創建臨時文件
                 imageFileName,   /* prefix */
                 ".jpg",          /* suffix */
                 storageDir       /* directory */
         );
-
         // 保存文件路徑，稍後用於顯示圖片
         m_currentPhotoPath = imageFile.getAbsolutePath();
+        Log.d( "Patty:Page2", "createImageFile: " +m_currentPhotoPath );
         return imageFile;
+
     }
+
     //將拍攝的照片（即Bitmap對象）保存到createImageFile創建的文件中
     private void saveImage( Bitmap bitmap )
     {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        //        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        //獲取用於儲存拍攝照片的目錄
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = null;
         try {
-            File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
-            File imageFile = File.createTempFile(
+            storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
+            Log.d( "Patty:Page2", "saveImage_: storageDir" + storageDir );
+            imageFile = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".jpg",         /* suffix */
                     storageDir      /* directory */
             );
             OutputStream outputStream = new FileOutputStream(imageFile);
+            Log.d( "Patty:Page2", "saveImage_: outputStream" + outputStream );
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // 保存文件路徑，稍後用於顯示圖片
+        m_currentPhotoPath = imageFile.getAbsolutePath();
+        Log.d( "Patty:Page2", "saveImage: " +m_currentPhotoPath );
+
+//        // 将图片路径保存到SharedPreferences
+//        if (imageFile != null) {
+//            SettingPreference.getInstance().setSample( imageFile.getAbsoluatePath() );
+//        }
     }
+    //    private void saveImage(Bitmap bitmap) {
+//        FileOutputStream fos = null;
+//        try {
+//            fos = openFileOutput("image.jpg", Context.MODE_PRIVATE);
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if (fos != null) {
+//                    fos.close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 }
