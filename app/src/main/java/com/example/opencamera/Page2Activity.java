@@ -19,12 +19,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Page2Activity extends AppCompatActivity
 {
@@ -33,8 +37,8 @@ public class Page2Activity extends AppCompatActivity
     TextView m_galleryButton;
     TextView m_title;
     Button m_uploadButton;
-    private File m_photoFile; //用於存儲拍攝的圖像檔案
     private String m_currentPhotoPath; //指定文件路徑
+    private List<PhotoList> m_photoList = new ArrayList<>();
 
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
@@ -105,12 +109,17 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
+                PhotoList photoList = new PhotoList( m_currentPhotoPath, "Null" );
+                m_photoList.add( photoList );
                 // 將圖片路徑保存到SharedPreferences
-                if ( m_currentPhotoPath != null )
+                if ( photoList != null )
                 {
+                    // 將photoList轉成Json存至SettingPreferences
+                    Gson gson = new Gson();
+                    String photoListJson = gson.toJson( m_photoList );
 
-                    SettingPreference.getInstance().setSample( m_currentPhotoPath );
-                    Log.d( "Patty:Page2", "createImageFile: " +m_currentPhotoPath );
+                    SettingPreference.getInstance().setSample( photoListJson );
+                    Log.d( "Patty:Page2", "createImageFile: " +photoListJson );
                 }
             }
         } );
