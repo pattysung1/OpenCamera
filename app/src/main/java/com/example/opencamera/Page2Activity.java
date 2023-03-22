@@ -132,7 +132,9 @@ public class Page2Activity extends AppCompatActivity
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 //使用之前儲存的文件來顯示圖片
+                //從路徑中讀取圖片
                 Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
+                //在 ImageView 中顯示圖片
                 m_ImageView.setImageBitmap(imageBitmap);
                 saveImage(imageBitmap);
             } else if (requestCode == REQUEST_IMAGE_PICK) {
