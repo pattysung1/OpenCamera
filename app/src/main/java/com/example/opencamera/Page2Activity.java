@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -60,6 +61,8 @@ public class Page2Activity extends AppCompatActivity
         m_ImageView = findViewById( R.id.imageView );
         m_title = findViewById( R.id.title );
         m_uploadButton = findViewById( R.id.uploadButton );
+//        m_uploadButton.setEnabled( false );
+
 
 
 
@@ -109,17 +112,23 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-                PhotoList photoList = new PhotoList( m_currentPhotoPath, "Null" );
-                m_photoList.add( photoList );
-                // 將圖片路徑保存到SharedPreferences
-                if ( photoList != null )
-                {
+                Log.d( "Patty:Page2", "m_uploadButton: " + m_currentPhotoPath );
+//                if (m_currentPhotoPath == null) {
+//                    m_uploadButton.setEnabled(false);
+//                    Toast toast = Toast.makeText(getApplicationContext(), "請先選擇照片或拍攝照片", Toast.LENGTH_SHORT);
+//                    toast.show();
+//                    return;
+//                }
+                if( m_currentPhotoPath != null){
+                    m_uploadButton.setEnabled( true );
+                    PhotoList photoList = new PhotoList( m_currentPhotoPath, "Null" );
+                    m_photoList.add( photoList );
+
                     // 將photoList轉成Json存至SettingPreferences
                     Gson gson = new Gson();
                     String photoListJson = gson.toJson( m_photoList );
-
                     SettingPreference.getInstance().setSample( photoListJson );
-                    Log.d( "Patty:Page2", "createImageFile: " +photoListJson );
+                    Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
                 }
             }
         } );
@@ -137,6 +146,7 @@ public class Page2Activity extends AppCompatActivity
                 //在 ImageView 中顯示圖片
                 m_ImageView.setImageBitmap(imageBitmap);
                 saveImage(imageBitmap);
+
             } else if (requestCode == REQUEST_IMAGE_PICK) {
                 //將選擇的照片轉成Bitmap
                 Uri imageUri = data.getData();

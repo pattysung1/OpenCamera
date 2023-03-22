@@ -2,6 +2,7 @@ package com.example.opencamera;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import application.SettingPreference;
@@ -44,6 +45,11 @@ public class MainActivity extends AppCompatActivity
 
         m_addButton = findViewById( R.id.addButton );
 
+        //用setting preference 接收
+        m_receiveJson = SettingPreference.getInstance().getSample();
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<PhotoList>>(){}.getType();
+        m_receivePhotoList = new ArrayList<>(gson.fromJson(m_receiveJson,type));
 
 
 
@@ -51,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         // 1.獲取 RecyclerView 的引用
         m_recyclerView = findViewById(R.id.recyclerView);
         // 2.Set LinearLayout Manager
-        m_LayoutManager = new LinearLayoutManager(this);
+        m_LayoutManager = new GridLayoutManager( this,2,RecyclerView.VERTICAL,false );
         m_recyclerView.setLayoutManager(m_LayoutManager);
 
         // 4.關鍵性的工作：要讓recyclerView把調變器整合上來
@@ -80,7 +86,7 @@ public class MainActivity extends AppCompatActivity
                 super(view);
                 itemView = view;
 
-                picture = (ImageView) itemView.findViewById(R.id.item_picture);
+                picture = itemView.findViewById(R.id.item_picture);
                 record = itemView.findViewById(R.id.item_record);
                 deleteButton = itemView.findViewById(R.id.item_delete);
             }
@@ -138,6 +144,7 @@ public class MainActivity extends AppCompatActivity
         Gson gson = new Gson();
         Type type = new TypeToken<List<PhotoList>>(){}.getType();
         m_receivePhotoList = new ArrayList<>(gson.fromJson(m_receiveJson,type));
+
         m_adapter.notifyDataSetChanged();
         super.onResume();
 
