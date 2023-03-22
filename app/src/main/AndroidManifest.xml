@@ -13,6 +13,9 @@
         tools:ignore="ScopedStorage" />
 <!--    讀取外部存儲權限-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--    加入錄音權限-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
 
     <application

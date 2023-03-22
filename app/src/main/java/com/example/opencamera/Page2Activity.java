@@ -1,14 +1,17 @@
 package com.example.opencamera;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import application.SettingPreference;
+import android.Manifest;
 
-import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.CameraProfile;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,7 +21,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,13 +42,20 @@ public class Page2Activity extends AppCompatActivity
     TextView m_galleryButton;
     TextView m_title;
     Button m_uploadButton;
+    ImageView m_recordButton;
+    boolean recordCondition = false;
     private String m_receiveJson2; //接收第二頁的PhotoList 儲存的資料
-    private String m_currentPhotoPath; //指定文件路徑
+    private String m_currentPhotoPath; //照片文件路徑
     private List<PhotoList> m_photoList = new ArrayList<>();
 
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
+
     private static final int PERMISSIONS_REQUEST_CAMERA = 100; //請求權限
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200; //請求權限
+
+    private MediaRecorder m_Recorder;
+    private String m_recordFilePath; //錄音路徑
 
     private ImageView m_ImageView;
 
@@ -64,15 +73,16 @@ public class Page2Activity extends AppCompatActivity
         m_ImageView = findViewById( R.id.imageView );
         m_title = findViewById( R.id.title );
         m_uploadButton = findViewById( R.id.uploadButton );
+        m_recordButton = findViewById( R.id.recordButton );
+
 //        m_uploadButton.setEnabled( false );
+
 
         //用setting preference 再接收
         m_receiveJson2 = SettingPreference.getInstance().getSample();
         Gson gson = new Gson();
         Type type = new TypeToken<List<PhotoList>>(){}.getType();
         m_photoList = new ArrayList<>(gson.fromJson(m_receiveJson2,type));
-
-
 
 
         //按下cameraButton
@@ -130,7 +140,7 @@ public class Page2Activity extends AppCompatActivity
 //                }
                 if( m_currentPhotoPath != null){
                     m_uploadButton.setEnabled( true );
-                    PhotoList photoList = new PhotoList( m_currentPhotoPath, "Null" );
+                    PhotoList photoList = new PhotoList( m_currentPhotoPath, m_recordFilePath );
                     m_photoList.add( photoList );
 
                     // 將photoList轉成Json存至SettingPreferences
@@ -138,6 +148,22 @@ public class Page2Activity extends AppCompatActivity
                     String photoListJson = gson.toJson( m_photoList );
                     SettingPreference.getInstance().setSample( photoListJson );
                     Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
+                }
+            }
+        } );
+        //按下錄音
+        m_recordButton.setOnClickListener( new View.OnClickListener()
+        {
+            @Override
+            public void onClick( View view )
+            {
+                if ( !recordCondition ){
+                    startRecording();
+                    recordCondition = true;
+                    Log.d( "Patty:Page2", "m_recordButton: 錄音中" );
+                } else{
+                    stopRecording();
+                    recordCondition = false;
                 }
             }
         } );
@@ -219,27 +245,47 @@ public class Page2Activity extends AppCompatActivity
         // 保存文件路徑，稍後用於顯示圖片
         m_currentPhotoPath = imageFile.getAbsolutePath();
         Log.d( "Patty:Page2", "saveImage: " +m_currentPhotoPath );
-
-//        // 将图片路径保存到SharedPreferences
-//        if (imageFile != null) {
-//            SettingPreference.getInstance().setSample( imageFile.getAbsoluatePath() );
-//        }
     }
-    //    private void saveImage(Bitmap bitmap) {
-//        FileOutputStream fos = null;
-//        try {
-//            fos = openFileOutput("image.jpg", Context.MODE_PRIVATE);
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (fos != null) {
-//                    fos.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+
+    private void startRecording() {
+        // 設定錄音檔案的儲存路徑
+        m_recordFilePath = getExternalCacheDir().getAbsolutePath() + "/record_" + System.currentTimeMillis() + ".3gp";
+        Log.d( "Patty", "startRecording: " );
+
+        // 檢查錄音權限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
+
+        // 初始化MediaRecorder物件
+        m_Recorder = new MediaRecorder();
+        // 設定音源來自麥克風
+        m_Recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        // 設定輸出格式
+        m_Recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        // 設定編碼格式
+        m_Recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        // 設定錄音檔案的儲存路徑
+        m_Recorder.setOutputFile( m_recordFilePath );
+
+        try {
+            // 準備MediaRecorder物件
+            m_Recorder.prepare();
+            // 開始錄音
+            m_Recorder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopRecording() {
+        Log.d( "Patty", "stopRecording: " );
+        if ( m_Recorder != null) {
+            // 停止錄音
+            m_Recorder.stop();
+            // 釋放MediaRecorder物件
+            m_Recorder.release();
+            m_Recorder = null;
+        }
+    }
 }

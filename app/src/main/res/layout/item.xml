@@ -14,7 +14,7 @@
             app:srcCompat="@drawable/ic_launcher_background"
             />
 
-        <TextView
+        <ImageButton
             android:id="@+id/item_record"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -22,7 +22,7 @@
             android:layout_toEndOf="@id/item_picture"
             />
 
-        <TextView
+        <ImageButton
             android:id="@+id/item_delete"
             android:layout_width="30dp"
             android:layout_height="30dp"

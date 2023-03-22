@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity
     private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
         class MyViewHolder extends RecyclerView.ViewHolder{
             public View itemView;
-            public TextView record, deleteButton;
+            public ImageButton record, deleteButton;
             public ImageView picture;
 
             public MyViewHolder(View view){
