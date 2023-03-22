@@ -21,11 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +40,7 @@ public class Page2Activity extends AppCompatActivity
     TextView m_galleryButton;
     TextView m_title;
     Button m_uploadButton;
+    private String m_receiveJson2; //接收第二頁的PhotoList 儲存的資料
     private String m_currentPhotoPath; //指定文件路徑
     private List<PhotoList> m_photoList = new ArrayList<>();
 
@@ -62,6 +65,12 @@ public class Page2Activity extends AppCompatActivity
         m_title = findViewById( R.id.title );
         m_uploadButton = findViewById( R.id.uploadButton );
 //        m_uploadButton.setEnabled( false );
+
+        //用setting preference 再接收
+        m_receiveJson2 = SettingPreference.getInstance().getSample();
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<PhotoList>>(){}.getType();
+        m_photoList = new ArrayList<>(gson.fromJson(m_receiveJson2,type));
 
 
 
