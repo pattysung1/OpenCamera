@@ -45,6 +45,7 @@ public class Page2Activity extends AppCompatActivity
     Button m_updateButton;
     ImageView m_recordButton;
     int count = 0; //設定index初始值
+    int continueCount; //紀錄count的數值
     boolean recordCondition = false;
     private String m_receiveJson2; //接收第二頁的PhotoList 儲存的資料
     private String m_currentPhotoPath; //照片文件路徑
@@ -82,6 +83,10 @@ public class Page2Activity extends AppCompatActivity
 
 //        m_uploadButton.setEnabled( false );
 
+        // 檢查錄音權限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
 
         //用setting preference 再接收
         m_receiveJson2 = SettingPreference.getInstance().getSample();
@@ -148,9 +153,15 @@ public class Page2Activity extends AppCompatActivity
                 }
                 if( m_currentPhotoPath != null){
                     m_uploadButton.setEnabled( true );
+                    count = SettingPreference.getInstance().getSample2();
+                    Log.d( "Patty:Page2", "getSample2: " + count );
                     PhotoList photoList = new PhotoList( count ,m_currentPhotoPath, m_recordFilePath );
                     count++;
+                    continueCount = count;
+
                     m_photoList.add( photoList );
+                    // 將count轉成Json存至SettingPreferences
+                    SettingPreference.getInstance().setSample2( continueCount );
 
                     // 將photoList轉成Json存至SettingPreferences
                     Gson gson = new Gson();
@@ -304,10 +315,7 @@ public class Page2Activity extends AppCompatActivity
         m_recordFilePath = getExternalCacheDir().getAbsolutePath() + "/record_" + System.currentTimeMillis() + ".3gp";
         Log.d( "Patty", "startRecording: " +m_recordFilePath );
 
-        // 檢查錄音權限
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
-        }
+
         // 初始化MediaRecorder物件
         m_Recorder = new MediaRecorder();
         // 設定音源來自麥克風
