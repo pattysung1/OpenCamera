@@ -44,6 +44,7 @@ public class Page2Activity extends AppCompatActivity
     Button m_uploadButton;
     Button m_updateButton;
     ImageView m_recordButton;
+    int count = 0; //設定index初始值
     boolean recordCondition = false;
     private String m_receiveJson2; //接收第二頁的PhotoList 儲存的資料
     private String m_currentPhotoPath; //照片文件路徑
@@ -147,7 +148,8 @@ public class Page2Activity extends AppCompatActivity
                 }
                 if( m_currentPhotoPath != null){
                     m_uploadButton.setEnabled( true );
-                    PhotoList photoList = new PhotoList( m_currentPhotoPath, m_recordFilePath );
+                    PhotoList photoList = new PhotoList( count ,m_currentPhotoPath, m_recordFilePath );
+                    count++;
                     m_photoList.add( photoList );
 
                     // 將photoList轉成Json存至SettingPreferences
@@ -210,6 +212,13 @@ public class Page2Activity extends AppCompatActivity
         Intent intent = getIntent();
         m_selectedPhotoPath = intent.getStringExtra("photoPath");
         Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片path" + m_selectedPhotoPath );
+
+        if( m_selectedPhotoPath != null){
+            Bitmap imageBitmap = BitmapFactory.decodeFile( m_selectedPhotoPath );
+            Log.d( "Patty:Page2", "result: 第一頁傳過來的照片path" + m_selectedPhotoPath );
+            //在 ImageView 中顯示圖片
+            m_imageView.setImageBitmap(imageBitmap);
+        }
     }
 
     @Override
@@ -335,11 +344,6 @@ public class Page2Activity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
-        if( m_selectedPhotoPath != null){
-            Bitmap imageBitmap = BitmapFactory.decodeFile( m_selectedPhotoPath );
-            Log.d( "Patty:Page2", "result: 第一頁傳過來的照片path" + m_selectedPhotoPath );
-            //在 ImageView 中顯示圖片
-            m_imageView.setImageBitmap(imageBitmap);
-        }
+
     }
 }
