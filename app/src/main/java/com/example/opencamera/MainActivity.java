@@ -1,11 +1,5 @@
 package com.example.opencamera;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import application.SettingPreference;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,7 +24,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.opencamera.R.drawable.stopplay;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import application.SettingPreference;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -129,7 +127,7 @@ public class MainActivity extends AppCompatActivity
                         m_recordFilePath = m_receivePhotoList.get(position).getRecord();
                         playRecording();
                         recordCondition = true;
-                        holder.playButton.setImageResource( R.drawable.stopplay );
+                        holder.playButton.setImageResource( R.drawable.stop2 );
                         Log.d( "Patty:Page", "m_recordButton: 播放中" );
                     } else{
                         stopPlaying();
@@ -144,7 +142,16 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick( View view )
                 {
+                    m_receivePhotoList.remove( holder.getAdapterPosition() );
                     Log.d( "Patty", "deleteButtonOnClick: 123" );
+                    m_adapter.notifyDataSetChanged();
+
+                    // 將photoList轉成Json存至SettingPreferences
+                    Gson gson = new Gson();
+                    String photoListJson = gson.toJson( m_receivePhotoList );
+                    SettingPreference.getInstance().setSample( photoListJson );
+                    Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
+
                 }
             } );
 
