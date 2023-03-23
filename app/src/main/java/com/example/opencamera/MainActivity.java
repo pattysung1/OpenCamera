@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity
     private MediaPlayer m_mediaPlayer;
     private String m_recordFilePath;
     boolean recordCondition = false;
+    private static final int REQUEST_IMAGE_INTENT = 999; // 把選取到的照片傳到第二頁
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -115,6 +116,19 @@ public class MainActivity extends AppCompatActivity
             // 設置圖像到ImageView中
             holder.picture.setImageBitmap(image);
             //從m_receivePhotoList獲得數據(錄音的地址)
+
+            //點選圖片，進行編輯或新增錄音
+            holder.picture.setOnClickListener( new View.OnClickListener()
+            {
+                @Override
+                public void onClick( View view )
+                {
+                    Intent intent = new Intent(MainActivity.this, Page2Activity.class);
+                    intent.putExtra("photoPath", imagePath);
+                    Log.d( "Patty", "holder.picture: "  + imagePath);
+                    startActivity(intent);
+                }
+            } );
 
             //播放錄音
             holder.playButton.setOnClickListener( new View.OnClickListener()

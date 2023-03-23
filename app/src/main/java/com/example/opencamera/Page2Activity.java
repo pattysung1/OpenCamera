@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -51,13 +52,14 @@ public class Page2Activity extends AppCompatActivity
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
 
+
     private static final int PERMISSIONS_REQUEST_CAMERA = 100; //請求權限
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200; //請求權限
 
     private MediaRecorder m_Recorder;
     private String m_recordFilePath; //錄音路徑
 
-    private ImageView m_ImageView;
+    private ImageView m_imageView;
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -70,7 +72,7 @@ public class Page2Activity extends AppCompatActivity
         m_cameraButton = findViewById( R.id.cameraButton );
 
         m_galleryButton = findViewById( R.id.galleryButton );
-        m_ImageView = findViewById( R.id.imageView );
+        m_imageView = findViewById( R.id.imageView );
         m_title = findViewById( R.id.title );
         m_uploadButton = findViewById( R.id.uploadButton );
         m_recordButton = findViewById( R.id.recordButton );
@@ -169,6 +171,13 @@ public class Page2Activity extends AppCompatActivity
                 }
             }
         } );
+
+        //接收第一頁圖片已進行編輯
+        Intent intent = getIntent();
+        String photoPath = intent.getStringExtra("photoPath");
+        Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片path" + photoPath);
+        // 使用Glide設置imageView的圖像
+        Glide.with(this).load(photoPath).into( m_imageView );
     }
 
     @Override
@@ -181,7 +190,7 @@ public class Page2Activity extends AppCompatActivity
                 //從路徑中讀取圖片
                 Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
                 //在 ImageView 中顯示圖片
-                m_ImageView.setImageBitmap(imageBitmap);
+                m_imageView.setImageBitmap(imageBitmap);
                 saveImage(imageBitmap);
 
             } else if (requestCode == REQUEST_IMAGE_PICK) {
@@ -190,7 +199,7 @@ public class Page2Activity extends AppCompatActivity
                 try {
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     //imageView顯示結果
-                    m_ImageView.setImageBitmap(imageBitmap);
+                    m_imageView.setImageBitmap(imageBitmap);
                     saveImage(imageBitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
