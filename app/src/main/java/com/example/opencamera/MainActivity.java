@@ -127,6 +127,10 @@ public class MainActivity extends AppCompatActivity
                     intent.putExtra("photoPath", imagePath);
                     Log.d( "Patty", "holder.picture: "  + imagePath);
                     startActivity(intent);
+//                    Intent intent = new Intent(MainActivity.this, Page2Activity.class);
+//                    intent.putExtra("result", imagePath);
+//                    Log.d( "Patty", "holder.picture: "  + imagePath);
+//                    startActivityForResult(intent, REQUEST_IMAGE_INTENT);
                 }
             } );
 

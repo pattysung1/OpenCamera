@@ -22,7 +22,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -51,13 +50,14 @@ public class Page2Activity extends AppCompatActivity
 
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
-
+    private static final int REQUEST_IMAGE_INTENT = 999;
 
     private static final int PERMISSIONS_REQUEST_CAMERA = 100; //請求權限
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200; //請求權限
 
     private MediaRecorder m_Recorder;
     private String m_recordFilePath; //錄音路徑
+    private String m_selectedPhotoPath; //第一頁選擇的要編輯照片的路徑
 
     private ImageView m_imageView;
 
@@ -140,6 +140,9 @@ public class Page2Activity extends AppCompatActivity
 //                    toast.show();
 //                    return;
 //                }
+                if( m_selectedPhotoPath != null){
+                    m_currentPhotoPath = m_selectedPhotoPath;
+                }
                 if( m_currentPhotoPath != null){
                     m_uploadButton.setEnabled( true );
                     PhotoList photoList = new PhotoList( m_currentPhotoPath, m_recordFilePath );
@@ -172,12 +175,10 @@ public class Page2Activity extends AppCompatActivity
             }
         } );
 
-        //接收第一頁圖片已進行編輯
+        //接收第一頁圖以進行編輯
         Intent intent = getIntent();
-        String photoPath = intent.getStringExtra("photoPath");
-        Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片path" + photoPath);
-        // 使用Glide設置imageView的圖像
-        Glide.with(this).load(photoPath).into( m_imageView );
+        m_selectedPhotoPath = intent.getStringExtra("photoPath");
+        Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片path" + m_selectedPhotoPath );
     }
 
     @Override
@@ -261,7 +262,7 @@ public class Page2Activity extends AppCompatActivity
     private void startRecording() {
         // 設定錄音檔案的儲存路徑
         m_recordFilePath = getExternalCacheDir().getAbsolutePath() + "/record_" + System.currentTimeMillis() + ".3gp";
-        Log.d( "Patty", "startRecording: " );
+        Log.d( "Patty", "startRecording: " +m_recordFilePath );
 
         // 檢查錄音權限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -296,6 +297,18 @@ public class Page2Activity extends AppCompatActivity
             // 釋放MediaRecorder物件
             m_Recorder.release();
             m_Recorder = null;
+        }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        if( m_selectedPhotoPath != null){
+            Bitmap imageBitmap = BitmapFactory.decodeFile( m_selectedPhotoPath );
+            Log.d( "Patty:Page2", "result: 第一頁傳過來的照片path" + m_selectedPhotoPath );
+            //在 ImageView 中顯示圖片
+            m_imageView.setImageBitmap(imageBitmap);
         }
     }
 }
