@@ -160,10 +160,12 @@ public class Page2Activity extends AppCompatActivity
                 if ( !recordCondition ){
                     startRecording();
                     recordCondition = true;
+                    m_recordButton.setImageResource( R.drawable.stop );
                     Log.d( "Patty:Page2", "m_recordButton: 錄音中" );
                 } else{
                     stopRecording();
                     recordCondition = false;
+                    m_recordButton.setImageResource( R.drawable.record );
                 }
             }
         } );
@@ -256,7 +258,6 @@ public class Page2Activity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
         }
-
         // 初始化MediaRecorder物件
         m_Recorder = new MediaRecorder();
         // 設定音源來自麥克風

@@ -3,13 +3,13 @@ package com.example.opencamera;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import application.SettingPreference;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,9 +25,12 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.opencamera.R.drawable.stopplay;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -37,6 +40,10 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView m_recyclerView;
     private RecyclerView.LayoutManager m_LayoutManager;
     private MyAdapter m_adapter;
+
+    private MediaPlayer m_mediaPlayer;
+    private String m_recordFilePath;
+    boolean recordCondition = false;
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -80,7 +87,7 @@ public class MainActivity extends AppCompatActivity
     private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
         class MyViewHolder extends RecyclerView.ViewHolder{
             public View itemView;
-            public ImageButton record, deleteButton;
+            public ImageButton playButton, deleteButton;
             public ImageView picture;
 
             public MyViewHolder(View view){
@@ -88,7 +95,7 @@ public class MainActivity extends AppCompatActivity
                 itemView = view;
 
                 picture = itemView.findViewById(R.id.item_picture);
-                record = itemView.findViewById(R.id.item_record);
+                playButton = itemView.findViewById(R.id.item_play);
                 deleteButton = itemView.findViewById(R.id.item_delete);
             }
         }
@@ -103,12 +110,34 @@ public class MainActivity extends AppCompatActivity
         }
         @Override
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
-            //從m_receivePhotoList獲得數據
+            //從m_receivePhotoList獲得數據(圖片的地址)
             String imagePath = m_receivePhotoList.get(position).getPhoto();
             // 调用loadImageFromStorage方法来加圖像
             Bitmap image = loadImageFromStorage(imagePath);
             // 設置圖像到ImageView中
             holder.picture.setImageBitmap(image);
+            //從m_receivePhotoList獲得數據(錄音的地址)
+
+            //播放錄音
+            holder.playButton.setOnClickListener( new View.OnClickListener()
+            {
+                @Override
+                public void onClick( View view )
+                {
+                    if ( !recordCondition ){
+                        //取得錄音的位置
+                        m_recordFilePath = m_receivePhotoList.get(position).getRecord();
+                        playRecording();
+                        recordCondition = true;
+                        holder.playButton.setImageResource( R.drawable.stopplay );
+                        Log.d( "Patty:Page", "m_recordButton: 播放中" );
+                    } else{
+                        stopPlaying();
+                        recordCondition = false;
+                        holder.playButton.setImageResource( R.drawable.play );
+                    }
+                }
+            } );
             //刪除資料
             holder.deleteButton.setOnClickListener( new View.OnClickListener()
             {
@@ -138,6 +167,26 @@ public class MainActivity extends AppCompatActivity
         }
         return null;
     }
+    // 播放錄音
+    private void playRecording() {
+        m_mediaPlayer = new MediaPlayer();
+        try {
+            m_mediaPlayer.setDataSource( m_recordFilePath );
+            m_mediaPlayer.prepare();
+            m_mediaPlayer.start();
+        } catch ( IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 停止播放錄音
+    private void stopPlaying() {
+        if ( m_mediaPlayer != null) {
+            m_mediaPlayer.release();
+            m_mediaPlayer = null;
+        }
+    }
+
     @Override
     protected void onResume(){
         //用setting preference 接收
