@@ -17,4 +17,10 @@ public class PhotoList
     public String getRecord() {
         return record;
     }
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
+    public void setRecord(String record) {
+        this.record = record;
+    }
 }

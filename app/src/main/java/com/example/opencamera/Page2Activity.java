@@ -42,6 +42,7 @@ public class Page2Activity extends AppCompatActivity
     TextView m_galleryButton;
     TextView m_title;
     Button m_uploadButton;
+    Button m_updateButton;
     ImageView m_recordButton;
     boolean recordCondition = false;
     private String m_receiveJson2; //接收第二頁的PhotoList 儲存的資料
@@ -75,6 +76,7 @@ public class Page2Activity extends AppCompatActivity
         m_imageView = findViewById( R.id.imageView );
         m_title = findViewById( R.id.title );
         m_uploadButton = findViewById( R.id.uploadButton );
+        m_updateButton = findViewById( R.id.updateButton );
         m_recordButton = findViewById( R.id.recordButton );
 
 //        m_uploadButton.setEnabled( false );
@@ -148,6 +150,35 @@ public class Page2Activity extends AppCompatActivity
                     PhotoList photoList = new PhotoList( m_currentPhotoPath, m_recordFilePath );
                     m_photoList.add( photoList );
 
+                    // 將photoList轉成Json存至SettingPreferences
+                    Gson gson = new Gson();
+                    String photoListJson = gson.toJson( m_photoList );
+                    SettingPreference.getInstance().setSample( photoListJson );
+                    Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
+                }
+            }
+        } );
+        m_updateButton.setOnClickListener( new View.OnClickListener()
+        {
+            @Override
+            public void onClick( View view )
+            {
+                if( m_selectedPhotoPath != null){
+                    m_currentPhotoPath = m_selectedPhotoPath;
+                }
+                if( m_currentPhotoPath != null){
+                    m_uploadButton.setEnabled( true );
+
+                    //找到當初那筆資料
+                    for(int i =0 ; i< m_photoList.size() ; i++){
+                        if( m_currentPhotoPath.equals (m_photoList.get(i).getPhoto())){
+                            Log.d( "Patty:Page2", "m_currentPhotoPath"  +m_currentPhotoPath );
+                            m_photoList.get(i).setRecord(m_recordFilePath);
+                            Log.d( "Patty:Page2", "m_uploadButton_m_recordFilePath: "  +m_recordFilePath );
+                            Log.d( "Patty:Page2", "m_uploadButton_m_photoList.get( i ).getRecord(): "  +m_photoList.get( i ).getRecord() );
+                            break; // 找到符合資料後結束迴圈
+                        }
+                    }
                     // 將photoList轉成Json存至SettingPreferences
                     Gson gson = new Gson();
                     String photoListJson = gson.toJson( m_photoList );
