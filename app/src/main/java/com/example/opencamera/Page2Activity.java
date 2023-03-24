@@ -61,7 +61,7 @@ public class Page2Activity extends AppCompatActivity
     private MediaRecorder m_Recorder;
     private String m_recordFilePath; //錄音路徑
     private String m_selectedPhotoPath; //第一頁選擇的要編輯照片的路徑
-
+    private int m_selectedPhotoIndex; //第一頁選擇的要編輯照片的index
     private ImageView m_imageView;
 
     @Override
@@ -148,18 +148,25 @@ public class Page2Activity extends AppCompatActivity
 //                    toast.show();
 //                    return;
 //                }
-                if( m_selectedPhotoPath != null){
-                    m_currentPhotoPath = m_selectedPhotoPath;
-                }
+//                if( m_selectedPhotoPath != null){
+//                    m_currentPhotoPath = m_selectedPhotoPath;
+//                }
                 if( m_currentPhotoPath != null){
                     m_uploadButton.setEnabled( true );
                     count = SettingPreference.getInstance().getSample2();
                     Log.d( "Patty:Page2", "getSample2: " + count );
-                    PhotoList photoList = new PhotoList( count ,m_currentPhotoPath, m_recordFilePath );
+                    PhotoList photoList;
+                    if(m_recordFilePath !=null){
+                        photoList = new PhotoList( count, m_currentPhotoPath, m_recordFilePath );
+
+                    } else{
+                        photoList = new PhotoList( count, m_currentPhotoPath, null );
+
+                    }
                     count++;
                     continueCount = count;
-
                     m_photoList.add( photoList );
+
                     // 將count轉成Json存至SettingPreferences
                     SettingPreference.getInstance().setSample2( continueCount );
 
@@ -176,29 +183,46 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-                if( m_selectedPhotoPath != null){
-                    m_currentPhotoPath = m_selectedPhotoPath;
-                }
-                if( m_currentPhotoPath != null){
-                    m_uploadButton.setEnabled( true );
+//                if( m_selectedPhotoPath != null){
+//                    m_currentPhotoPath = m_selectedPhotoPath;
+//                    Log.d( "Patty:Page2", "m_selectedPhotoPath:" + m_selectedPhotoPath );
+//                }
+                Log.d( "Patty", "m_currentPhotoPath: " + m_currentPhotoPath);
 
-                    //找到當初那筆資料
-                    for(int i =0 ; i< m_photoList.size() ; i++){
-                        if( m_currentPhotoPath.equals (m_photoList.get(i).getPhoto())){
-                            Log.d( "Patty:Page2", "m_currentPhotoPath"  +m_currentPhotoPath );
-                            m_photoList.get(i).setRecord(m_recordFilePath);
-                            Log.d( "Patty:Page2", "m_uploadButton_m_recordFilePath: "  +m_recordFilePath );
-                            Log.d( "Patty:Page2", "m_uploadButton_m_photoList.get( i ).getRecord(): "  +m_photoList.get( i ).getRecord() );
+                    m_uploadButton.setEnabled( true );
+                    //找到當初那筆資料(從index來找地址)
+                    for ( int i = 0; i < m_photoList.size(); i++ )
+                    {
+                        if ( m_selectedPhotoIndex == m_photoList.get( i ).getIndex() )
+                        {
+                            Log.d( "Patty:Page2", "m_selectedPhotoIndex:" + m_selectedPhotoIndex );
+                            m_photoList.get( i ).setRecord( m_recordFilePath );
+                            if (m_currentPhotoPath == null){
+                                m_currentPhotoPath = m_selectedPhotoPath;
+                            }
+                            m_photoList.get( i ).setPhoto( m_currentPhotoPath );
                             break; // 找到符合資料後結束迴圈
                         }
                     }
+//                    //找到當初那筆資料
+//                    for ( int i = 0; i < m_photoList.size(); i++ )
+//                    {
+//                        if ( m_currentPhotoPath.equals( m_photoList.get( i ).getPhoto() ) )
+//                        {
+//                            Log.d( "Patty:Page2", "m_currentPhotoPath" + m_currentPhotoPath );
+//                            m_photoList.get( i ).setRecord( m_recordFilePath );
+//                            Log.d( "Patty:Page2", "m_uploadButton_m_recordFilePath: " + m_recordFilePath );
+//                            Log.d( "Patty:Page2", "m_uploadButton_m_photoList.get( i ).getRecord(): " + m_photoList.get( i ).getRecord() );
+//                            break; // 找到符合資料後結束迴圈
+//                        }
+//                    }
                     // 將photoList轉成Json存至SettingPreferences
                     Gson gson = new Gson();
                     String photoListJson = gson.toJson( m_photoList );
                     SettingPreference.getInstance().setSample( photoListJson );
                     Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
                 }
-            }
+
         } );
         //按下錄音
         m_recordButton.setOnClickListener( new View.OnClickListener()
@@ -221,9 +245,17 @@ public class Page2Activity extends AppCompatActivity
 
         //接收第一頁圖以進行編輯
         Intent intent = getIntent();
-        m_selectedPhotoPath = intent.getStringExtra("photoPath");
-        Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片path" + m_selectedPhotoPath );
+        m_selectedPhotoIndex = intent.getIntExtra("photoIndex", -1);
+        Log.d( "Patty:Page2", "onActivityResult: 第一頁傳過來的照片index:" + m_selectedPhotoIndex );
 
+        //找到當初那筆資料(從index來找地址)
+        for(int i =0 ; i< m_photoList.size() ; i++){
+            if( m_selectedPhotoIndex == m_photoList.get( i ).getIndex() ){
+                Log.d( "Patty:Page2", "m_currentPhotoPath:"  +m_selectedPhotoIndex );
+                m_selectedPhotoPath = m_photoList.get(i).getPhoto();
+                break; // 找到符合資料後結束迴圈
+            }
+        }
         if( m_selectedPhotoPath != null){
             Bitmap imageBitmap = BitmapFactory.decodeFile( m_selectedPhotoPath );
             Log.d( "Patty:Page2", "result: 第一頁傳過來的照片path" + m_selectedPhotoPath );

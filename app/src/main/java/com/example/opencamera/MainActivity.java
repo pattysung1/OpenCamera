@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity
     private MediaPlayer m_mediaPlayer;
     private String m_recordFilePath;
     boolean recordCondition = false;
-    private static final int REQUEST_IMAGE_INTENT = 999; // 把選取到的照片傳到第二頁
+
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -115,22 +117,19 @@ public class MainActivity extends AppCompatActivity
             Bitmap image = loadImageFromStorage(imagePath);
             // 設置圖像到ImageView中
             holder.picture.setImageBitmap(image);
-            //從m_receivePhotoList獲得數據(錄音的地址)
+            //取得圖片的index
+            int index = m_receivePhotoList.get(position).getIndex();
 
-            //點選圖片，進行編輯或新增錄音
+            //點選圖片，進行編輯或新增錄音-傳送index
             holder.picture.setOnClickListener( new View.OnClickListener()
             {
                 @Override
                 public void onClick( View view )
                 {
                     Intent intent = new Intent(MainActivity.this, Page2Activity.class);
-                    intent.putExtra("photoPath", imagePath);
-                    Log.d( "Patty", "holder.picture: "  + imagePath);
+                    intent.putExtra("photoIndex", index);
+                    Log.d( "Patty", "holder.picture: "  + index);
                     startActivity(intent);
-//                    Intent intent = new Intent(MainActivity.this, Page2Activity.class);
-//                    intent.putExtra("result", imagePath);
-//                    Log.d( "Patty", "holder.picture: "  + imagePath);
-//                    startActivityForResult(intent, REQUEST_IMAGE_INTENT);
                 }
             } );
 
@@ -140,6 +139,13 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick( View view )
                 {
+                    m_recordFilePath = m_receivePhotoList.get(position).getRecord();
+                    // 檢查文件是否存在
+                    if ( TextUtils.isEmpty(m_recordFilePath)) {
+                        Toast.makeText(getApplicationContext(), "该文件不存在！", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     if ( !recordCondition ){
                         //取得錄音的位置
                         m_recordFilePath = m_receivePhotoList.get(position).getRecord();
