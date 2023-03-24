@@ -40,18 +40,15 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView m_recyclerView;
     private RecyclerView.LayoutManager m_LayoutManager;
     private MyAdapter m_adapter;
-
     private MediaPlayer m_mediaPlayer;
     private String m_recordFilePath;
     boolean recordCondition = false;
-
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
     {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
-
         m_addButton = findViewById( R.id.addButton );
 
         //用setting preference 接收
@@ -59,9 +56,6 @@ public class MainActivity extends AppCompatActivity
         Gson gson = new Gson();
         Type type = new TypeToken<List<PhotoList>>(){}.getType();
         m_receivePhotoList = new ArrayList<>(gson.fromJson(m_receiveJson,type));
-
-
-
 
         // 1.獲取 RecyclerView 的引用
         m_recyclerView = findViewById(R.id.recyclerView);
@@ -142,7 +136,7 @@ public class MainActivity extends AppCompatActivity
                     m_recordFilePath = m_receivePhotoList.get(position).getRecord();
                     // 檢查文件是否存在
                     if ( TextUtils.isEmpty(m_recordFilePath)) {
-                        Toast.makeText(getApplicationContext(), "该文件不存在！", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "文件不存在！", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -175,10 +169,8 @@ public class MainActivity extends AppCompatActivity
                     String photoListJson = gson.toJson( m_receivePhotoList );
                     SettingPreference.getInstance().setSample( photoListJson );
                     Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
-
                 }
             } );
-
             }
 
         @Override
@@ -217,7 +209,6 @@ public class MainActivity extends AppCompatActivity
             m_mediaPlayer = null;
         }
     }
-
     @Override
     protected void onResume(){
         //用setting preference 接收
@@ -228,8 +219,5 @@ public class MainActivity extends AppCompatActivity
 
         m_adapter.notifyDataSetChanged();
         super.onResume();
-
     }
-
-
 }

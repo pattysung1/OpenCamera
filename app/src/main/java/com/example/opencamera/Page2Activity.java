@@ -53,8 +53,6 @@ public class Page2Activity extends AppCompatActivity
 
     private static final int REQUEST_IMAGE_CAPTURE = 1; // 相機操作
     private static final int REQUEST_IMAGE_PICK = 2; // 圖庫操作
-    private static final int REQUEST_IMAGE_INTENT = 999;
-
     private static final int PERMISSIONS_REQUEST_CAMERA = 100; //請求權限
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200; //請求權限
 
@@ -81,8 +79,6 @@ public class Page2Activity extends AppCompatActivity
         m_updateButton = findViewById( R.id.updateButton );
         m_recordButton = findViewById( R.id.recordButton );
 
-//        m_uploadButton.setEnabled( false );
-
         // 檢查錄音權限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
@@ -94,7 +90,6 @@ public class Page2Activity extends AppCompatActivity
         Type type = new TypeToken<List<PhotoList>>(){}.getType();
         m_photoList = new ArrayList<>(gson.fromJson(m_receiveJson2,type));
 
-
         //按下cameraButton
         m_cameraButton.setOnClickListener( new View.OnClickListener()
         {
@@ -102,9 +97,9 @@ public class Page2Activity extends AppCompatActivity
             public void onClick( View view )
             {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                // Check if there is a camera app installed on the device
+                // 檢查是否有安裝相機程式
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    // Create a new empty file to save the image
+                    // 創建文件保存圖像
                     File photoFile = null;
                     try {
                         photoFile = createImageFile();
@@ -112,11 +107,11 @@ public class Page2Activity extends AppCompatActivity
                         ex.printStackTrace();
                     }
                     if (photoFile != null) {
-                        // Get the URI of the file using a FileProvider
+                        // 用FileProvider取得URI
                         Uri photoURI = FileProvider.getUriForFile(Page2Activity.this, "com.example.myapp.fileprovider", photoFile);
-                        // Set the file URI as the output for the photo
+                        // 將文件的URI設置為照片的輸出
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        // Launch the camera app
+                        // 開啟相機
                         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                     }
                 }
@@ -142,26 +137,14 @@ public class Page2Activity extends AppCompatActivity
             public void onClick( View view )
             {
                 Log.d( "Patty:Page2", "m_uploadButton: " + m_currentPhotoPath );
-//                if (m_currentPhotoPath == null) {
-//                    m_uploadButton.setEnabled(false);
-//                    Toast toast = Toast.makeText(getApplicationContext(), "請先選擇照片或拍攝照片", Toast.LENGTH_SHORT);
-//                    toast.show();
-//                    return;
-//                }
-//                if( m_selectedPhotoPath != null){
-//                    m_currentPhotoPath = m_selectedPhotoPath;
-//                }
                 if( m_currentPhotoPath != null){
-                    m_uploadButton.setEnabled( true );
                     count = SettingPreference.getInstance().getSample2();
                     Log.d( "Patty:Page2", "getSample2: " + count );
                     PhotoList photoList;
                     if(m_recordFilePath !=null){
                         photoList = new PhotoList( count, m_currentPhotoPath, m_recordFilePath );
-
                     } else{
                         photoList = new PhotoList( count, m_currentPhotoPath, null );
-
                     }
                     count++;
                     continueCount = count;
@@ -176,6 +159,7 @@ public class Page2Activity extends AppCompatActivity
                     SettingPreference.getInstance().setSample( photoListJson );
                     Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
                 }
+                m_recordFilePath = null;
             }
         } );
         m_updateButton.setOnClickListener( new View.OnClickListener()
@@ -183,13 +167,8 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-//                if( m_selectedPhotoPath != null){
-//                    m_currentPhotoPath = m_selectedPhotoPath;
-//                    Log.d( "Patty:Page2", "m_selectedPhotoPath:" + m_selectedPhotoPath );
-//                }
                 Log.d( "Patty", "m_currentPhotoPath: " + m_currentPhotoPath);
 
-                    m_uploadButton.setEnabled( true );
                     //找到當初那筆資料(從index來找地址)
                     for ( int i = 0; i < m_photoList.size(); i++ )
                     {
@@ -204,18 +183,6 @@ public class Page2Activity extends AppCompatActivity
                             break; // 找到符合資料後結束迴圈
                         }
                     }
-//                    //找到當初那筆資料
-//                    for ( int i = 0; i < m_photoList.size(); i++ )
-//                    {
-//                        if ( m_currentPhotoPath.equals( m_photoList.get( i ).getPhoto() ) )
-//                        {
-//                            Log.d( "Patty:Page2", "m_currentPhotoPath" + m_currentPhotoPath );
-//                            m_photoList.get( i ).setRecord( m_recordFilePath );
-//                            Log.d( "Patty:Page2", "m_uploadButton_m_recordFilePath: " + m_recordFilePath );
-//                            Log.d( "Patty:Page2", "m_uploadButton_m_photoList.get( i ).getRecord(): " + m_photoList.get( i ).getRecord() );
-//                            break; // 找到符合資料後結束迴圈
-//                        }
-//                    }
                     // 將photoList轉成Json存至SettingPreferences
                     Gson gson = new Gson();
                     String photoListJson = gson.toJson( m_photoList );
@@ -311,13 +278,12 @@ public class Page2Activity extends AppCompatActivity
 
     }
 
-    //將拍攝的照片（即Bitmap對象）保存到createImageFile創建的文件中
+    //將照片（即Bitmap對象）保存到createImageFile創建的文件中
     private void saveImage( Bitmap bitmap )
     {
-        // Create an image file name
+        // 創建文件名稱
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-
         //獲取用於儲存拍攝照片的目錄
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File imageFile = null;
@@ -331,9 +297,9 @@ public class Page2Activity extends AppCompatActivity
             );
             OutputStream outputStream = new FileOutputStream(imageFile);
             Log.d( "Patty:Page2", "saveImage_: outputStream" + outputStream );
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream); //Bitmap對象轉換成JPEG格式
+            outputStream.flush(); //數據寫入文件並清空輸出流
+            outputStream.close(); //關閉輸出流
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -346,8 +312,6 @@ public class Page2Activity extends AppCompatActivity
         // 設定錄音檔案的儲存路徑
         m_recordFilePath = getExternalCacheDir().getAbsolutePath() + "/record_" + System.currentTimeMillis() + ".3gp";
         Log.d( "Patty", "startRecording: " +m_recordFilePath );
-
-
         // 初始化MediaRecorder物件
         m_Recorder = new MediaRecorder();
         // 設定音源來自麥克風
@@ -378,12 +342,5 @@ public class Page2Activity extends AppCompatActivity
             m_Recorder.release();
             m_Recorder = null;
         }
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-
     }
 }
