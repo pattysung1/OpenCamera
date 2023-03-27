@@ -158,6 +158,10 @@ public class Page2Activity extends AppCompatActivity
                     String photoListJson = gson.toJson( m_photoList );
                     SettingPreference.getInstance().setSample( photoListJson );
                     Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
+
+                    // 跳回第一頁
+                    Intent intent = new Intent(Page2Activity.this, MainActivity.class);
+                    startActivity(intent);
                 }
                 m_recordFilePath = null;
             }

@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity
     private MyAdapter m_adapter;
     private MediaPlayer m_mediaPlayer;
     private String m_recordFilePath;
-    boolean recordCondition = false;
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -139,19 +138,10 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(), "文件不存在！", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    if ( !recordCondition ){
-                        //取得錄音的位置
-                        m_recordFilePath = m_receivePhotoList.get(position).getRecord();
-                        playRecording();
-                        recordCondition = true;
-                        holder.playButton.setImageResource( R.drawable.stop2 );
-                        Log.d( "Patty:Page", "m_recordButton: 播放中" );
-                    } else{
-                        stopPlaying();
-                        recordCondition = false;
-                        holder.playButton.setImageResource( R.drawable.play );
-                    }
+                    //取得錄音的位置
+                    m_recordFilePath = m_receivePhotoList.get( position ).getRecord();
+                    playRecording();
+                    Log.d( "Patty:Page", "m_recordButton: 播放中" );
                 }
             } );
             //刪除資料
@@ -202,14 +192,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // 停止播放錄音
-    private void stopPlaying() {
-        if ( m_mediaPlayer != null) {
-            m_mediaPlayer.release();
-            m_mediaPlayer = null;
-        }
-    }
-    @Override
+//    // 停止播放錄音
+//    private void stopPlaying() {
+//        if ( m_mediaPlayer != null) {
+//            m_mediaPlayer.release();
+//            m_mediaPlayer = null;
+//        }
+//    }
+//    @Override
     protected void onResume(){
         //用setting preference 接收
         m_receiveJson = SettingPreference.getInstance().getSample();
