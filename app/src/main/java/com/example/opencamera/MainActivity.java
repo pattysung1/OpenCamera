@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -106,10 +107,10 @@ public class MainActivity extends AppCompatActivity
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
             //從m_receivePhotoList獲得數據(圖片的地址)
             String imagePath = m_receivePhotoList.get(position).getPhoto();
-            // 调用loadImageFromStorage方法来加圖像
-            Bitmap image = loadImageFromStorage(imagePath);
-            // 設置圖像到ImageView中
-            holder.picture.setImageBitmap(image);
+            // 使用 Glide 加载图片
+            Glide.with(holder.itemView)
+                    .load(imagePath)
+                    .into(holder.picture);
             //取得圖片的index
             int index = m_receivePhotoList.get(position).getIndex();
 
@@ -169,17 +170,17 @@ public class MainActivity extends AppCompatActivity
             return m_receivePhotoList.size();
         }
     }
-    //讀取圖像方法
-    private Bitmap loadImageFromStorage(String path) {
-        try {
-            File f = new File(path);
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            return b;
-        } catch ( FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    //讀取圖像方法
+//    private Bitmap loadImageFromStorage(String path) {
+//        try {
+//            File f = new File(path);
+//            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+//            return b;
+//        } catch ( FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
     // 播放錄音
     private void playRecording() {
         m_mediaPlayer = new MediaPlayer();
@@ -199,7 +200,7 @@ public class MainActivity extends AppCompatActivity
 //            m_mediaPlayer = null;
 //        }
 //    }
-//    @Override
+    @Override
     protected void onResume(){
         //用setting preference 接收
         m_receiveJson = SettingPreference.getInstance().getSample();

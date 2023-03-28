@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -171,29 +172,32 @@ public class Page2Activity extends AppCompatActivity
             @Override
             public void onClick( View view )
             {
-                Log.d( "Patty", "m_currentPhotoPath: " + m_currentPhotoPath);
-
-                    //找到當初那筆資料(從index來找地址)
-                    for ( int i = 0; i < m_photoList.size(); i++ )
+                Log.d( "Patty", "m_currentPhotoPath: " + m_currentPhotoPath );
+                //找到當初那筆資料(從index來找地址)
+                for ( int i = 0; i < m_photoList.size(); i++ )
+                {
+                    if ( m_selectedPhotoIndex == m_photoList.get( i ).getIndex() )
                     {
-                        if ( m_selectedPhotoIndex == m_photoList.get( i ).getIndex() )
+                        Log.d( "Patty:Page2", "m_selectedPhotoIndex:" + m_selectedPhotoIndex );
+                        m_photoList.get( i ).setRecord( m_recordFilePath );
+                        if ( m_currentPhotoPath == null )
                         {
-                            Log.d( "Patty:Page2", "m_selectedPhotoIndex:" + m_selectedPhotoIndex );
-                            m_photoList.get( i ).setRecord( m_recordFilePath );
-                            if (m_currentPhotoPath == null){
-                                m_currentPhotoPath = m_selectedPhotoPath;
-                            }
-                            m_photoList.get( i ).setPhoto( m_currentPhotoPath );
-                            break; // 找到符合資料後結束迴圈
+                            m_currentPhotoPath = m_selectedPhotoPath;
                         }
+                        m_photoList.get( i ).setPhoto( m_currentPhotoPath );
+                        break; // 找到符合資料後結束迴圈
                     }
-                    // 將photoList轉成Json存至SettingPreferences
-                    Gson gson = new Gson();
-                    String photoListJson = gson.toJson( m_photoList );
-                    SettingPreference.getInstance().setSample( photoListJson );
-                    Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
                 }
+                // 將photoList轉成Json存至SettingPreferences
+                Gson gson = new Gson();
+                String photoListJson = gson.toJson( m_photoList );
+                SettingPreference.getInstance().setSample( photoListJson );
+                Log.d( "Patty:Page2", "createImageFile: " + photoListJson );
 
+                // 跳回第一頁
+                Intent intent = new Intent(Page2Activity.this, MainActivity.class);
+                startActivity(intent);
+            }
         } );
         //按下錄音
         m_recordButton.setOnClickListener( new View.OnClickListener()
@@ -231,7 +235,9 @@ public class Page2Activity extends AppCompatActivity
             Bitmap imageBitmap = BitmapFactory.decodeFile( m_selectedPhotoPath );
             Log.d( "Patty:Page2", "result: 第一頁傳過來的照片path" + m_selectedPhotoPath );
             //在 ImageView 中顯示圖片
-            m_imageView.setImageBitmap(imageBitmap);
+            Glide.with(this)
+                    .load(m_selectedPhotoPath)
+                    .into(m_imageView);
         }
     }
 
@@ -241,12 +247,12 @@ public class Page2Activity extends AppCompatActivity
 
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                //使用之前儲存的文件來顯示圖片
-                //從路徑中讀取圖片
-                Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
-                //在 ImageView 中顯示圖片
-                m_imageView.setImageBitmap(imageBitmap);
-                saveImage(imageBitmap);
+                // 使用 Glide 加载保存的图片
+                Glide.with(this)
+                        .load(m_currentPhotoPath)
+                        .into(m_imageView);
+                // 保存图片
+                saveImage(BitmapFactory.decodeFile(m_currentPhotoPath));
 
             } else if (requestCode == REQUEST_IMAGE_PICK) {
                 //將選擇的照片轉成Bitmap
@@ -254,7 +260,10 @@ public class Page2Activity extends AppCompatActivity
                 try {
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     //imageView顯示結果
-                    m_imageView.setImageBitmap(imageBitmap);
+                    Glide.with(this)
+                            .load(imageBitmap)
+                            .into(m_imageView);
+                    // 保存图片
                     saveImage(imageBitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -262,6 +271,33 @@ public class Page2Activity extends AppCompatActivity
             }
         }
     }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (resultCode == RESULT_OK) {
+//            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+//                //使用之前儲存的文件來顯示圖片
+//                //從路徑中讀取圖片
+//                Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
+//                //在 ImageView 中顯示圖片
+//                m_imageView.setImageBitmap(imageBitmap);
+//                saveImage(imageBitmap);
+//
+//            } else if (requestCode == REQUEST_IMAGE_PICK) {
+//                //將選擇的照片轉成Bitmap
+//                Uri imageUri = data.getData();
+//                try {
+//                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+//                    //imageView顯示結果
+//                    m_imageView.setImageBitmap(imageBitmap);
+//                    saveImage(imageBitmap);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
     //創建一個用於儲存照片的文件(可指定文件的名稱和路徑)
     private File createImageFile() throws IOException {
