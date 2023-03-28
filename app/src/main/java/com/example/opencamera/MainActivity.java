@@ -170,17 +170,6 @@ public class MainActivity extends AppCompatActivity
             return m_receivePhotoList.size();
         }
     }
-//    //讀取圖像方法
-//    private Bitmap loadImageFromStorage(String path) {
-//        try {
-//            File f = new File(path);
-//            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-//            return b;
-//        } catch ( FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
     // 播放錄音
     private void playRecording() {
         m_mediaPlayer = new MediaPlayer();
@@ -193,13 +182,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-//    // 停止播放錄音
-//    private void stopPlaying() {
-//        if ( m_mediaPlayer != null) {
-//            m_mediaPlayer.release();
-//            m_mediaPlayer = null;
-//        }
-//    }
     @Override
     protected void onResume(){
         //用setting preference 接收

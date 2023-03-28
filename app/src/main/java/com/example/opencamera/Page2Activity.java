@@ -247,22 +247,12 @@ public class Page2Activity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 Log.d( "Patty", "onActivityResult: " + "123");
-
-                // 使用 Glide 加载保存的图片
-                // 获取图片的 Uri，并将其转化为字符串形式存储在 m_currentPhotoPath 变量中
-//                Uri photoUri = data.getData();
-//                Log.d( "Patty", "onActivityResult: photoUri" +photoUri);
-//                m_currentPhotoPath = photoUri.toString();
-
                 Glide.with(this)
                         .load(m_currentPhotoPath)
                         .into(m_imageView);
-//                // 保存图片
-//                saveImage(BitmapFactory.decodeFile(m_currentPhotoPath));
             } else if (requestCode == REQUEST_IMAGE_PICK) {
                 //將選擇的照片轉成Bitmap
                 Uri imageUri = data.getData();
@@ -286,7 +276,6 @@ public class Page2Activity extends AppCompatActivity
                     }
                     Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
-
                     //imageView顯示結果
                     Glide.with(this)
                             .load(imageBitmap)
@@ -313,83 +302,6 @@ public class Page2Activity extends AppCompatActivity
         // 将照片显示到 ImageView 上
         Glide.with(this).load(m_currentPhotoPath).into(m_imageView);
     }
-
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (resultCode == RESULT_OK) {
-//            if (requestCode == REQUEST_IMAGE_CAPTURE) {
-//                //使用之前儲存的文件來顯示圖片
-//                //從路徑中讀取圖片
-//                Bitmap imageBitmap = BitmapFactory.decodeFile(m_currentPhotoPath);
-//                //在 ImageView 中顯示圖片
-//                m_imageView.setImageBitmap(imageBitmap);
-//                saveImage(imageBitmap);
-//
-//            } else if (requestCode == REQUEST_IMAGE_PICK) {
-//                //將選擇的照片轉成Bitmap
-//                Uri imageUri = data.getData();
-//                try {
-//                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-//                    //imageView顯示結果
-//                    m_imageView.setImageBitmap(imageBitmap);
-//                    saveImage(imageBitmap);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-
-//    //創建一個用於儲存照片的文件(可指定文件的名稱和路徑)
-//    private File createImageFile() throws IOException {
-//        // 用時間戳命名文件，避免重複
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String imageFileName = "JPEG_" + timeStamp + "_";
-//        //獲取用於儲存拍攝照片的目錄
-//        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES );
-//        File imageFile = File.createTempFile( //創建臨時文件
-//                imageFileName,   /* prefix */
-//                ".jpg",          /* suffix */
-//                storageDir       /* directory */
-//        );
-//        // 保存文件路徑，稍後用於顯示圖片
-//        m_currentPhotoPath = imageFile.getAbsolutePath();
-//        Log.d( "Patty:Page2", "createImageFile: " +m_currentPhotoPath );
-//        return imageFile;
-//
-//    }
-//
-//    //將照片（即Bitmap對象）保存到createImageFile創建的文件中
-//    private void saveImage( Bitmap bitmap )
-//    {
-//        // 創建文件名稱
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String imageFileName = "JPEG_" + timeStamp + "_";
-//        //獲取用於儲存拍攝照片的目錄
-//        File storageDir;
-//        File imageFile = null;
-//        try {
-//            storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
-//            Log.d( "Patty:Page2", "saveImage_: storageDir" + storageDir );
-//            imageFile = File.createTempFile(
-//                    imageFileName,  /* prefix */
-//                    ".jpg",         /* suffix */
-//                    storageDir      /* directory */
-//            );
-//            OutputStream outputStream = new FileOutputStream(imageFile);
-//            Log.d( "Patty:Page2", "saveImage_: outputStream" + outputStream );
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream); //Bitmap對象轉換成JPEG格式
-//            outputStream.flush(); //數據寫入文件並清空輸出流
-//            outputStream.close(); //關閉輸出流
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        // 保存文件路徑，稍後用於顯示圖片
-//        m_currentPhotoPath = imageFile.getAbsolutePath();
-//        Log.d( "Patty:Page2", "saveImage: " +m_currentPhotoPath );
-//    }
     private void saveImage(Bitmap bitmap) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, "JPEG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
